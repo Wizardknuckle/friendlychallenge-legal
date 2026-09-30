@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Join a challenge — Friendly Challenge</title>
+  <!--
+    The join link's landing page. A share carries
+    https://wizardknuckle.github.io/friendlychallenge-legal/join/CODE and
+    this page shows the code large, the store buttons, and "Open" for a
+    phone that already has the app.
+
+    GitHub Pages serves static files only, so /join/CODE has no file of its
+    own: the site's 404.html (a copy of this page) answers it, reads the
+    code off the path and renders the same thing — with a 404 status, which
+    a person never sees and a crawler is told to ignore. /join/?c=CODE and
+    /join/#CODE reach this file directly with a 200. Plain HTML, no
+    framework; keep the two files identical.
+  -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      max-width: 480px;
+      width: 100%;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+    .icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .tagline { font-size: 0.95rem; color: #666; margin-bottom: 1.5rem; }
+    .code-label {
+      font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: #999; margin-bottom: 0.5rem;
+    }
+    .code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 2.25rem; font-weight: 700; letter-spacing: 0.25em;
+      padding: 0.75rem 1rem; border: 2px dashed #c8d0db; border-radius: 12px;
+      margin: 0 auto 0.75rem; display: inline-block; user-select: all;
+    }
+    .code.missing { font-size: 1rem; letter-spacing: 0; border-style: solid; color: #888; }
+    .copy { font-size: 0.85rem; color: #2563EB; background: none; border: none; cursor: pointer; margin-bottom: 1.75rem; }
+    .copy:hover { text-decoration: underline; }
+    .divider { border: none; border-top: 1px solid #eee; margin: 0 0 1.5rem; }
+    .step { font-size: 0.9rem; color: #444; margin-bottom: 1rem; }
+    .buttons { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .store {
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+      padding: 0.9rem 1.25rem; border-radius: 10px; border: 1px solid #e8ecf0;
+      text-decoration: none; color: #1a1a2e; font-weight: 600; font-size: 1rem;
+      background: #fff;
+    }
+    .store:hover { background: #f5f7fa; border-color: #c8d0db; }
+    .store.soon { color: #999; cursor: default; }
+    .store .sub { display: block; font-size: 0.72rem; font-weight: 400; color: #999; }
+    .open {
+      display: block; width: 100%; padding: 1rem 1.25rem; border-radius: 10px;
+      background: #2563EB; color: #fff; font-weight: 700; font-size: 1rem;
+      text-decoration: none; border: none; cursor: pointer;
+    }
+    .open:hover { background: #1d4ed8; }
+    .open-hint { font-size: 0.78rem; color: #999; margin-top: 0.5rem; }
+    .footer { margin-top: 2rem; font-size: 0.78rem; color: #bbb; }
+    .footer a { color: #888; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🏆</div>
+    <h1>You're invited to a challenge</h1>
+    <p class="tagline">on Friendly Challenge</p>
+
+    <p class="code-label">Your join code</p>
+    <div class="code" id="code">…</div>
+    <div><button class="copy" id="copy" type="button">Copy code</button></div>
+
+    <hr class="divider">
+    <p class="step"><strong>1.</strong> Get the app</p>
+    <div class="buttons">
+      <a class="store soon" id="play" href="#" onclick="return false;">
+        <span>▶</span>
+        <span>Google Play <span class="sub">coming soon — the app is in beta</span></span>
+      </a>
+      <a class="store soon" id="appstore" href="#" onclick="return false;">
+        <span></span>
+        <span>App Store <span class="sub">coming soon — the app is in beta</span></span>
+      </a>
+    </div>
+    <p class="step"><strong>2.</strong> Open it, go to Discover, tap <em>Have a code?</em> and enter the code above.</p>
+
+    <hr class="divider">
+    <p class="step">Already have it?</p>
+    <a class="open" id="open" href="#">Open in the app</a>
+    <p class="open-hint" id="open-hint">Opens the app on this challenge.</p>
+
+    <p class="footer">
+      <a href="../">Friendly Challenge</a> · Questions? <a href="mailto:friendlychallengeteam@gmail.com">friendlychallengeteam@gmail.com</a>
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      // The code: from the path (/join/CODE, via 404.html), the query
+      // (?c=CODE) or the hash (#CODE). Eight characters, no 0/O/1/I.
+      var VALID = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;
+      var fromPath = (location.pathname.match(/\/join\/([^\/?#]+)/i) || [])[1];
+      var fromQuery = (location.search.match(/[?&]c=([^&]+)/) || [])[1];
+      var fromHash = location.hash.replace(/^#/, '');
+      var raw = fromPath || fromQuery || fromHash || '';
+      var code = decodeURIComponent(raw).replace(/[\s-]/g, '').toUpperCase();
+      var codeEl = document.getElementById('code');
+      var openEl = document.getElementById('open');
+      var hintEl = document.getElementById('open-hint');
+      var copyEl = document.getElementById('copy');
+
+      if (!VALID.test(code)) {
+        codeEl.textContent = 'No code in this link. Ask your friend to share it again.';
+        codeEl.className = 'code missing';
+        copyEl.style.display = 'none';
+        openEl.style.display = 'none';
+        hintEl.style.display = 'none';
+        return;
+      }
+      codeEl.textContent = code;
+      document.title = 'Join with code ' + code + ' — Friendly Challenge';
+
+      copyEl.addEventListener('click', function () {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(code).then(function () { copyEl.textContent = 'Copied'; });
+        } else {
+          var range = document.createRange(); range.selectNodeContents(codeEl);
+          var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        }
+      });
+
+      // "Open" tries the app's custom scheme. A phone without the app does
+      // nothing visible for it; the hint says what to do then.
+      var scheme = 'friendlychallenge://join/' + code;
+      openEl.setAttribute('href', scheme);
+      openEl.addEventListener('click', function () {
+        setTimeout(function () {
+          hintEl.textContent = "If nothing opened, the app isn't installed yet — get it above, then enter the code.";
+        }, 1500);
+      });
+    })();
+  </script>
+</body>
+</html>
